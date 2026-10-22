@@ -1,7 +1,7 @@
 #include <vmlib/small_vector.hpp>
 
 // The following ensures that our core types are instantiated at least once.
-// This helps us catch problems with the core definitions of the types early.
+// This helps us catch problems with the core de	finitions of the types early.
 namespace
 {
 	using Vec2f = SmallVec<2,float>;
