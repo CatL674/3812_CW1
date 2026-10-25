@@ -6,31 +6,27 @@
 #include <cstdlib>
 #include <cstddef>
 
-/** SmallVec<N,type>: N-D vector of type elements.
- *
- * The type deliberately stores its elements directly.  This keeps it
- * standard-layout and trivially copyable, with no dynamic memory allocation.
- */
 template< std::size_t tSize, typename tType = float >
 struct SmallVec
 {
+	//Store vector elements of arbitrary dimensions using an array
 	tType v[tSize];
 
+	//For non-const objects, the corresponding elements can be modified via subscripting
 	constexpr
 	tType& operator[] (std::size_t aIdx) noexcept
 	{
 		assert( aIdx < tSize );
 		return v[aIdx];
 	}
-
+	
 	constexpr
 	tType const& operator[] (std::size_t aIdx) const noexcept
 	{
 		assert( aIdx < tSize );
 		return v[aIdx];
 	}
-		
-	// 中文提示：返回可修改的数据指针，便于传给需要连续数组的 API。
+	
 	constexpr
 	tType* data() noexcept
 	{
@@ -44,10 +40,11 @@ struct SmallVec
 	}
 };
 
-/* Named accessors for 2D vectors. */
+
 template< typename tType >
 struct SmallVec<2,tType>
 {
+	//the first two elements are directly named x and y for 2D vector
 	tType x, y;
 
 	constexpr
@@ -77,7 +74,7 @@ struct SmallVec<2,tType>
 	}
 };
 
-/* Named accessors for 3D vectors. */
+//Add z to 3D vector
 template< typename tType >
 struct SmallVec<3,tType>
 {
@@ -110,7 +107,7 @@ struct SmallVec<3,tType>
 	}
 };
 
-/* Named accessors for 4D vectors. */
+//Add w to 4D vector: Homogeneous coordinates
 template< typename tType >
 struct SmallVec<4,tType>
 {
@@ -143,14 +140,14 @@ struct SmallVec<4,tType>
 	}
 };
 
-// Helpers
 template< std::size_t tSize, typename tType > constexpr
 std::size_t dimension( SmallVec<tSize,tType> ) noexcept
 {
 	return tSize;
 }
 
-// Operators
+//Vector addition involves adding corresponding elements one by one
+//Subtraction also involves subtracting corresponding elements one by one
 template< std::size_t tSize, typename tType > constexpr
 SmallVec<tSize, tType> operator+ (SmallVec<tSize,tType> const& aVec ) noexcept
 {
@@ -184,6 +181,7 @@ SmallVec<tSize, tType> operator- (SmallVec<tSize,tType> const& aLhs, SmallVec<tS
 	return ret;
 }
 
+//Scalar multiplication involves multiplying every element in a vector by the same number
 template< std::size_t tSize, typename tType > constexpr
 SmallVec<tSize, tType> operator* (tType aScalar, SmallVec<tSize,tType> const& aRhs ) noexcept
 {
@@ -208,6 +206,7 @@ SmallVec<tSize, tType> operator/ (SmallVec<tSize,tType> const& aLhs, tType aScal
 	return ret;
 }
 
+//Directly modify the left vector and finally return itself
 template< std::size_t tSize, typename tType > constexpr
 SmallVec<tSize, tType>& operator+= (SmallVec<tSize,tType>& aLhs, SmallVec<tSize,tType> const& aRhs ) noexcept
 {
@@ -240,7 +239,7 @@ SmallVec<tSize, tType>& operator/= (SmallVec<tSize,tType>& aLhs, tType aScalar )
 	return aLhs;
 }
 
-// Common operations
+//The dot product is the sum of the products of corresponding elements
 template< std::size_t tSize, typename tType > constexpr
 tType dot( SmallVec<tSize,tType> const& aLhs, SmallVec<tSize,tType> const& aRhs ) noexcept
 {
@@ -250,19 +249,21 @@ tType dot( SmallVec<tSize,tType> const& aLhs, SmallVec<tSize,tType> const& aRhs 
 	return ret;
 }
 
+//The length is equal to the square root of the result of the dot product
 template< std::size_t tSize, typename tType > inline
 tType length( SmallVec<tSize,tType> const& aVec ) noexcept
 {
 	return static_cast<tType>( std::sqrt( static_cast<long double>( dot(aVec, aVec) ) ) );
 }
 
+//After normalization the direction remains unchanged, but the length becomes 1
 template< std::size_t tSize, typename tType > constexpr
 SmallVec<tSize,tType> normalize( SmallVec<tSize,tType> const& aVec ) noexcept
 {
 	return aVec / length(aVec);
 }
 
-// Only for Vec<3,type>
+//The cross product result is perpendicular to both input 3D vectors
 template< typename tType > constexpr
 SmallVec<3,tType> cross( SmallVec<3,tType> const& aLhs, SmallVec<3,tType> const& aRhs ) noexcept
 {
@@ -273,4 +274,4 @@ SmallVec<3,tType> cross( SmallVec<3,tType> const& aLhs, SmallVec<3,tType> const&
 	};
 }
 
-#endif // SMALL_VECTOR_HPP_214E3703_A050_411A_834B_4E55AEEC18B8
+#endif
