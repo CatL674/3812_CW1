@@ -1,7 +1,6 @@
 #ifndef SMALL_MATRIX_HPP_7266454B_05D7_441E_8775_07E79DDBBE03
 #define SMALL_MATRIX_HPP_7266454B_05D7_441E_8775_07E79DDBBE03
 
-
 #include "small_vector.hpp"
 
 /** SmallMat: NxM matrix
@@ -46,28 +45,49 @@ struct SmallMat
 	{
 		assert( aI < tM && aJ < tN );
 		return v[aI*tN + aJ];
-	};
+	}
 
-	// Return pointer to the data
 	// Use this e.g., for glUniformMatrix4fv( location, 1, matrix.data() );
+	//Return the address of the first element of the matrix
+	constexpr
 	tType const* data() const noexcept
 	{
 		return v;
 	}
 };
 
-
 // Operators
 template< std::size_t tM, std::size_t tN, std::size_t tP, typename tType > constexpr
 SmallMat<tM,tP,tType> operator*( SmallMat<tM,tN,tType> const& aLhs, SmallMat<tN,tP,tType> const& aRhs ) noexcept
 {
-	return {}; //TODO: implement me
+	SmallMat<tM,tP,tType> ret{};
+
+	//Take the dot product of a row from the left matrix and a column from the right matrix
+	for( std::size_t i = 0; i < tM; ++i )
+	{
+		for( std::size_t j = 0; j < tP; ++j )
+		{
+			for( std::size_t k = 0; k < tN; ++k )
+				ret[i,j] += aLhs[i,k] * aRhs[k,j];
+		}
+	}
+
+	return ret;
 }
 
 template< std::size_t tM, std::size_t tN, typename tType > constexpr
 SmallVec<tM,tType> operator*( SmallMat<tM,tN,tType> const& aLeft, SmallVec<tN,tType> const& aRight ) noexcept
 {
-	return {}; //TODO: implement me
+	SmallVec<tM,tType> ret{};
+
+	//When a matrix is ​​multiplied by a vector, each row performs a dot product with the vector
+	for( std::size_t i = 0; i < tM; ++i )
+	{
+		for( std::size_t j = 0; j < tN; ++j )
+			ret[i] += aLeft[i,j] * aRight[j];
+	}
+
+	return ret;
 }
 
 // Functions
@@ -75,7 +95,16 @@ template< std::size_t tM, std::size_t tN, typename tType >
 constexpr
 SmallMat<tN,tM,tType> transpose( SmallMat<tM,tN,tType> const& aMat ) noexcept
 {
-	return {}; //TODO: implement me
+	SmallMat<tN,tM,tType> ret{};
+
+	//Transposition swaps the row index and column index of each element
+	for( std::size_t i = 0; i < tM; ++i )
+	{
+		for( std::size_t j = 0; j < tN; ++j )
+			ret[j,i] = aMat[i,j];
+	}
+
+	return ret;
 }
 
 // Pseudo-constructor for identity matrices
@@ -90,13 +119,13 @@ tMatrix make_identity() noexcept
 	[] <std::size_t tN, typename tType> (SmallMat<tN,tN,tType>& aMat)
 	{
 		for( std::size_t i = 0; i < tN; ++i )
-			aMat[i,i] = 1.f;
+			aMat[i,i] = tType(1);
 	}( ret );
 	return ret;
 }
 
 // For Task 2.1 only:
-template< std::size_t tN, typename tType, std::size_t tM > inline 
+template< std::size_t tN, typename tType, std::size_t tM > inline
 void gauss( SmallMat<tN,tN,tType> aMat, SmallMat<tN,tM,tType>& aResult ) noexcept
 {
 	// TODO-Task 2.1 only: implement me
